@@ -195,3 +195,21 @@ Si tu página web actualmente se puede abrir por otras personas, significa que y
 
 
 
+
+
+
+
+Que agente utiliza la pipeline que me ayudaste a crear?
+
+Para saber qué agente utiliza la pipeline que te ayudé a crear, debemos revisar la sección pool de tu código YAML.
+Basado en la explicación que me proporcionaste, tu pipeline utiliza un agente alojado por Microsoft.
+Aquí está la línea relevante de tu código YAML:
+code
+Yaml
+2. pool: vmImage: 'ubuntu-latest'
+Explicación:
+pool:: Esta es la sección donde se configura el agente.
+vmImage: 'ubuntu-latest': Esta línea especifica que la pipeline debe ejecutarse en una máquina virtual con la imagen más reciente de Ubuntu que es proporcionada y mantenida por Azure DevOps.
+Por lo tanto, tu pipeline utiliza un agente alojado por Microsoft (Microsoft-hosted agent), específicamente una máquina con Ubuntu. No está usando el agente autoalojado que configuraste en tu propia computadora, a menos que hubieras modificado esta línea en tu YAML para apuntar a tu pool de agentes autoalojados.
+Relación con la imagen que me mostraste:
+Tu pipeline consume el "1 parallel job" y los "1800 mins/mo" de la sección Private projects > Microsoft-hosted.
