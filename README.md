@@ -66,3 +66,85 @@ ArtifactName: 'drop': Le da un nombre al artefacto. "drop" es un nombre convenci
 publishLocation: 'Container': Indica que el artefacto debe publicarse en el almacenamiento interno de Azure DevOps (un "contenedor" dentro del contexto de la build).
 En resumen: Este paso toma tu aplicación zip preparada y la guarda en Azure DevOps, de modo que puedas acceder a ella más tarde (por ejemplo, para descargarla o para que una pipeline de despliegue la use).
 `
+
+
+
+
+
+
+Explicacion de los pasos con ejemplo
+
+4. steps: (Los Pasos a Seguir)
+Esta es la lista de todas las acciones que tu "robot" (el agente de Azure DevOps) va a realizar en el orden que las escribas. Piensa en cada - task: como una instrucción específica para hacer algo.
+Ejemplo cotidiano: Cuando preparas una taza de café, tus "steps" podrían ser:
+Poner agua en la cafetera.
+Poner café en el filtro.
+Encender la cafetera.
+Servir en una taza.
+En tu pipeline, cada - task: es un "mini-programa" predefinido de Azure DevOps que sabe cómo hacer algo específico, como trabajar con código .NET.
+Paso 1: Dotnet Restore (¡Consigue los ingredientes!)
+`
+task: DotNetCoreCLI@2
+displayName: 'Dotnet Restore'
+inputs:
+command: 'restore'
+projects: '$(projectPath)MiWebAppKarlasStuffs.csproj'
+`
+Explicación sencilla: Piensa que tu proyecto .NET necesita muchas "librerías" o "paquetes" externos para funcionar. Son como los ingredientes que no fabricas tú, sino que compras en el supermercado (por ejemplo, el azúcar, la leche).
+command: 'restore': Le estás diciendo al "robot": "¡Ve y busca todos los ingredientes que mi proyecto necesita!" El robot mirará la lista de tu proyecto (.csproj) y descargará todo lo necesario de internet (de NuGet, que es como el "supermercado de paquetes" de .NET).
+projects: '$(projectPath)MiWebAppKarlasStuffs.csproj': Le dices dónde buscar la lista de ingredientes, en qué archivo de proyecto.
+Ejemplo: Imagina que quieres hacer una tarta y necesitas harina, huevos, azúcar. Este paso es como ir a la tienda y asegurarte de tener todos esos elementos antes de empezar a mezclar. Si te falta algo, la tarta no saldrá.
+Paso 2: Dotnet Build (¡Mezcla y hornea!)
+`
+task: DotNetCoreCLI@2
+displayName: 'Dotnet Build'
+inputs:
+command: 'build'
+projects: '$(projectPath)MiWebAppKarlasStuffs.csproj'
+arguments: '--configuration $(buildConfiguration)'
+`
+Explicación sencilla: Una vez que tienes todos los ingredientes, el siguiente paso es usarlos para crear tu aplicación. "Build" (construir) significa tomar todo tu código (lo que tú escribiste) y transformarlo en un programa que una computadora pueda entender y ejecutar. Es como cuando mezclas los ingredientes y horneas la tarta.
+command: 'build': Le dices al "robot": "¡Compila mi código y haz un programa con él!"
+arguments: '--configuration $(buildConfiguration)': Esto es como decir: "Haz esta tarta en modo 'fiesta' (Release), no en modo 'prueba' (Debug)". El modo "Release" suele hacer que el programa sea más pequeño y rápido.
+Ejemplo: Con la harina, huevos y azúcar, este paso sería mezclarlos, amasarlos y luego meter la masa en el horno. Si hay un error en tu código (por ejemplo, olvidaste un punto y coma), es como si la tarta no subiera o se quemara. ¡El "build" fallaría!
+Paso 3: (Tareas de Prueba) (¡Prueba un pedacito!)
+`
+- task: DotNetCoreCLI@2
+displayName: 'Dotnet Test'
+inputs:
+command: 'test'
+projects: '$(projectPath)MiWebAppKarlasStuffs.Tests.csproj'
+`
+Explicación sencilla: Esta sección está comentada (#), lo que significa que ahora mismo tu "robot" se la salta. Pero si estuviera activa, sería el momento de comprobar que tu aplicación funciona correctamente.
+command: 'test': Aquí el "robot" ejecutaría tus "pruebas unitarias". Son como pequeños experimentos que tú escribes para asegurarte de que cada parte de tu código hace lo que se espera.
+Ejemplo: Después de hornear la tarta, antes de servirla, ¡pruebas un trocito! Así te aseguras de que sabe bien, que no está cruda, etc. Si el trocito está malo, sabes que algo anda mal con la tarta completa.
+Paso 4: Dotnet Publish (¡Empaqueta la tarta para llevar!)
+`
+task: DotNetCoreCLI@2
+displayName: 'Dotnet Publish'
+inputs:
+command: 'publish'
+projects: '$(projectPath)MiWebAppKarlasStuffs.csproj'
+publishWebProjects: false
+arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+zipAfterPublish: true
+`
+Explicación sencilla: Una vez que tu aplicación está construida y lista, necesitas prepararla para llevarla a donde va a funcionar de verdad (un servidor web, por ejemplo). "Publish" (publicar) significa juntar tu programa con todo lo que necesita para ejecutarse (librerías, archivos de configuración) en una carpeta organizada y compacta. Es como poner la tarta ya horneada en una caja bonita, lista para que alguien se la lleve.
+command: 'publish': Le dices al "robot": "¡Prepara mi aplicación para desplegarla!"
+--output $(Build.ArtifactStagingDirectory): Le dices dónde poner la caja de la tarta, en una carpeta temporal especial que Azure DevOps prepara.
+zipAfterPublish: true: Le dices: "Cuando termines de poner todo en la caja, ¡comprime la caja en un archivo .zip para que sea más fácil de mover!"
+Ejemplo: Tienes la tarta horneada. Este paso es ponerla con cuidado en una caja de cartón especial, asegurándote de que no le falte nada para que quien la reciba pueda disfrutarla directamente. Y luego, por comodidad, esa caja la metes en una bolsa zip para que ocupe menos y sea más fácil de transportar.
+Paso 5: PublishBuildArtifacts (¡Pon la caja de la tarta en el camión de reparto!)
+`
+task: PublishBuildArtifacts@1
+displayName: 'Upload Build Artifact'
+inputs:
+PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+ArtifactName: 'drop'
+publishLocation: 'Container'
+`
+Explicación sencilla: Ya tienes tu aplicación empacada en un archivo .zip dentro de esa carpeta temporal. Ahora, este paso es crucial: guardarlo en un lugar seguro y accesible dentro de Azure DevOps, para que puedas usarlo después. Es como cuando la empresa de tartas pone la caja de la tarta en un camión de reparto para que llegue a su destino.
+PathtoPublish: '$(Build.ArtifactStagingDirectory)': Le dices al "robot": "¡El archivo que quiero guardar está en esta carpeta temporal!" (donde el paso anterior lo dejó).
+ArtifactName: 'drop': Le pones un nombre al archivo guardado, en este caso "drop". Es como etiquetar la caja de la tarta para que sea fácil identificarla.
+publishLocation: 'Container': Le dices: "Guarda esto dentro del 'almacén' de Azure DevOps para esta ejecución de la pipeline".
+Ejemplo: El camión de reparto (Azure DevOps) llega a tu casa, recoge la caja de la tarta (el .zip de tu aplicación) y la lleva a un almacén central. Desde ese almacén, tú o alguien más podrá recogerla más tarde (descargar el .zip) para llevarla al servidor final donde se ejecutará tu aplicación.
