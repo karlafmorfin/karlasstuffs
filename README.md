@@ -148,3 +148,50 @@ PathtoPublish: '$(Build.ArtifactStagingDirectory)': Le dices al "robot": "¡El a
 ArtifactName: 'drop': Le pones un nombre al archivo guardado, en este caso "drop". Es como etiquetar la caja de la tarta para que sea fácil identificarla.
 publishLocation: 'Container': Le dices: "Guarda esto dentro del 'almacén' de Azure DevOps para esta ejecución de la pipeline".
 Ejemplo: El camión de reparto (Azure DevOps) llega a tu casa, recoge la caja de la tarta (el .zip de tu aplicación) y la lleva a un almacén central. Desde ese almacén, tú o alguien más podrá recogerla más tarde (descargar el .zip) para llevarla al servidor final donde se ejecutará tu aplicación.
+
+
+
+
+
+
+
+
+
+
+
+Me ayudaste a crear una pagina web y tengo duda de desde donde se ejecuta cuando alguien la abre, ayer yo cree un agente autoalojado en mi computadora desde mi cuenta de azure devops, explicame si tiene relacion
+Es muy común confundir cómo se relaciona el agente autoalojado con la ejecución de tu página web. Vamos a aclararlo.
+Tienes razón al sentir que hay una relación, pero es importante diferenciar entre dos cosas:
+La ejecución de tu pipeline (que construye y empaqueta tu página web).
+La ejecución de tu página web (cuando un usuario la visita en su navegador).
+¿Desde dónde se ejecuta tu página web cuando alguien la abre?
+Cuando alguien abre tu página web en su navegador, esta se ejecuta desde un servidor web que está accesible en internet las 24 horas del día, los 7 días de la semana.
+Imagina que tu página web es un restaurante.
+El servidor web es el edificio del restaurante, siempre abierto y listo para atender a los clientes.
+Tu página web son los platos que se preparan y se sirven en ese restaurante.
+Cuando un usuario teclea la dirección de tu página (URL) en su navegador, lo que ocurre es:
+El navegador envía una solicitud a la dirección de ese servidor web.
+El servidor web "sirve" los archivos de tu página (HTML, CSS, JavaScript, imágenes) al navegador del usuario.
+El navegador del usuario interpreta esos archivos y los muestra en pantalla.
+Este servidor web es, generalmente, un servicio en la nube (como Azure App Service, máquinas virtuales en Azure, o servicios de otros proveedores como AWS o Google Cloud) o un servidor físico en algún centro de datos.
+
+¿Qué relación tiene tu agente autoalojado con esto?
+Tu agente autoalojado que creaste en tu computadora es una pieza fundamental, ¡pero no para servir la página web a los usuarios! Su función es:
+Ayudar en la construcción y empaquetado de tu página web, no en su ejecución final para los usuarios.
+Vamos a ver los dos escenarios:
+Agentes alojados en la nube (Hosted Agents): Cuando usas pool: vmImage: 'ubuntu-latest', tu pipeline se ejecuta en una máquina virtual que Azure DevOps te presta temporalmente. Esta máquina existe solo para construir y empaquetar tu código, y luego desaparece.
+Relación con tu web: Es la "cocina" donde se prepara la tarta (tu web). Una vez hecha la tarta, la "cocina" se desmantela.
+Agente autoalojado (Self-Hosted Agent) en tu PC: Si configuraste tu pipeline para usar tu propio agente (en lugar de ubuntu-latest), entonces tu computadora se convierte en esa "cocina". Cuando haces un git push a main, Azure DevOps envía las instrucciones de tu pipeline a tu PC, y es tu PC la que:
+Descarga el código.
+Restaura los paquetes (dotnet restore).
+Compila el código (dotnet build).
+Publica y empaqueta la aplicación (dotnet publish, creando el .zip).
+Sube el paquete .zip a Azure DevOps como un artefacto.
+Relación con tu web: Tu PC es la "cocina" donde se prepara la tarta. Sin embargo, nadie come la tarta directamente de tu cocina. La tarta terminada (el .zip que se sube como artefacto) aún necesita ser llevada al "restaurante" (el servidor web en la nube) para que los clientes la prueben.
+En resumen:
+Tu agente autoalojado (tu PC) se usa para el proceso de Continuous Integration (CI): tomar tu código, compilarlo, probarlo y empaquetarlo. Este proceso termina con un "artefacto" (tu .zip de la aplicación).
+Para que tu página web esté disponible para los usuarios, necesitas un paso adicional llamado Continuous Deployment (CD): tomar ese artefacto (.zip) y desplegarlo en un servidor web (por ejemplo, Azure App Service). Es ese servidor web el que estará siempre encendido y será accesible a todo el mundo.
+Si tu página web actualmente se puede abrir por otras personas, significa que ya está desplegada en algún servidor web en internet (quizás en un servicio como Azure App Service que configuraste en algún momento). Tu agente autoalojado, en sí mismo, no "sirve" la web a los usuarios.
+
+
+
