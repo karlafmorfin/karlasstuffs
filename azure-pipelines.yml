@@ -1,0 +1,60 @@
+# Trigger la pipeline cuando haya cambios en la rama 'main'
+trigger:
+- main
+
+# Define el agente donde se ejecutarán las tareas
+pool:
+  vmImage: 'ubuntu-latest' # Agente de Linux, bueno para .NET Core
+
+# Variables que podemos usar en la pipeline
+variables:
+  buildConfiguration: 'Release' # Compilaremos en modo Release
+  # ¡IMPORTANTE! Ajusta esta ruta según la estructura real de tu repositorio.
+  # Basado en tu información, tu proyecto .NET está dentro de una carpeta llamada 'MiWebAppKarlasStuffs'
+  # en la raíz de tu repositorio 'karlasstuffs'.
+  projectPath: 'MiWebAppKarlasStuffs/' 
+
+steps:
+# 1. Tarea para restaurar paquetes NuGet
+- task: DotNetCoreCLI@2
+  displayName: 'Dotnet Restore'
+  inputs:
+    command: 'restore'
+    projects: '$(projectPath)MiWebAppKarlasStuffs.csproj' # Restaura el proyecto .csproj con el nombre correcto
+
+# 2. Tarea para compilar la aplicación
+- task: DotNetCoreCLI@2
+  displayName: 'Dotnet Build'
+  inputs:
+    command: 'build'
+    projects: '$(projectPath)MiWebAppKarlasStuffs.csproj' # Compila el proyecto .csproj con el nombre correcto
+    arguments: '--configuration $(buildConfiguration)'
+
+# 3. Tarea para ejecutar pruebas (si tuvieras un proyecto de pruebas)
+# Por ahora, la comentaremos porque no hemos creado un proyecto de pruebas.
+# Cuando tengas uno, puedes descomentar y ajustar la ruta.
+# - task: DotNetCoreCLI@2
+#   displayName: 'Dotnet Test'
+#   inputs:
+#     command: 'test'
+#     projects: '$(projectPath)MiWebAppKarlasStuffs.Tests.csproj' # Ajusta esto a la ruta de tu proyecto de pruebas
+#     arguments: '--configuration $(buildConfiguration)'
+
+# 4. Tarea para publicar los artefactos de la compilación
+- task: DotNetCoreCLI@2
+  displayName: 'Dotnet Publish'
+  inputs:
+    command: 'publish'
+    projects: '$(projectPath)MiWebAppKarlasStuffs.csproj' # Publica el proyecto .csproj con el nombre correcto
+    publishWebProjects: false 
+    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)' 
+    zipAfterPublish: true 
+
+# 5. Tarea para subir el artefacto resultante a Azure DevOps
+- task: PublishBuildArtifacts@1
+  displayName: 'Upload Build Artifact'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)' 
+    ArtifactName: 'drop' 
+    publishLocation: 'Container'
+    
