@@ -20,7 +20,7 @@ variables:
   azureSubscription: 'AzureServiceConnectionForKarlaWebApp' # El nombre de tu conexión de servicio de Azure
                                                        # (Verifica que sea exactamente como la creaste,
                                                        # en tu imagen se ve "AzureServiceConnectionForWebApp")
-  webAppName: 'karlaaprendiendo-karlasstuffs-cd74d0df-f4cb-4699-a986-cb91c736bc9d'                    # El nombre de tu Azure App Service
+  webAppName: 'karlasstuffs'                    # El nombre de tu Azure App Service
                                                        # (Asegúrate que coincida con el nombre real de tu App Service en Azure)
 
 stages:
