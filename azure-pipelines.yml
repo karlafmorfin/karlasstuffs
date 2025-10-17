@@ -59,27 +59,28 @@ stages:
         publishLocation: 'Container'
 
 - stage: Deploy
-  displayName: 'Deploy Stage' 
+  displayName: 'Deploy Stage'
   dependsOn: Build
   condition: succeeded()
   jobs:
-  - deployment: DeployWebApp
-    displayName: 'Deploy Web App'
-    environment: 'karlastuffs-env'
-    pool:
-      vmImage: 'ubuntu-latest' 
-
-    steps: 
-    - task: DownloadBuildArtifacts@1
-      displayName: 'Download Build Artifacts'
-      inputs:
-        artifactName: 'drop'
-        downloadPath: '$(System.ArtifactsDirectory)'
-
-    - task: AzureWebApp@1
-      displayName: 'Deploy Azure Web App'
-      inputs:
-        azureSubscription: '$(azureSubscription)'
-        appType: 'webApp'
-        appName: '$(webAppName)'
-        package: '$(System.ArtifactsDirectory)/drop/**/*.zip'
+    - deployment: DeployWebApp
+      displayName: 'Deploy Web App'
+      environment: 'karlastuffs-env'
+      pool:
+        vmImage: 'ubuntu-latest'
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - task: DownloadBuildArtifacts@1
+                displayName: 'Download Build Artifacts'
+                inputs:
+                  artifactName: 'drop'
+                  downloadPath: '$(System.ArtifactsDirectory)'
+              - task: AzureWebApp@1
+                displayName: 'Deploy Azure Web App'
+                inputs:
+                  azureSubscription: '$(azureSubscription)'
+                  appType: 'webApp'
+                  appName: '$(webAppName)'
+                  package: '$(System.ArtifactsDirectory)/drop/**/*.zip'
