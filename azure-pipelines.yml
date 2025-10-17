@@ -23,7 +23,7 @@ stages:
   jobs:
   - job: BuildJob
     displayName: 'Build and Publish'
-    steps:
+    steps: # <-- LÍNEA 72: Asegúrate de que esta línea esté correctamente indentada.
     - task: UseDotNet@2
       displayName: 'Use .NET 8.x SDK'
       inputs:
@@ -65,11 +65,11 @@ stages:
   jobs:
   - deployment: DeployWebApp
     displayName: 'Deploy Web App'
-    environment: 'karlastuffs-env' # Puedes usar un nombre de entorno lógico para tu despliegue
+    environment: 'karlastuffs-env'
     pool:
       vmImage: 'ubuntu-latest' 
 
-    steps: # <-- ¡Presta especial atención a la indentación aquí!
+    steps: 
     - task: DownloadBuildArtifacts@1
       displayName: 'Download Build Artifacts'
       inputs:
