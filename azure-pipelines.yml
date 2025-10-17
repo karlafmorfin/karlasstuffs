@@ -13,7 +13,7 @@ variables:
 
   # VARIABLES PARA EL DESPLIEGUE (CONFIRMADAS)
   azureSubscription: 'AzureServiceConnectionForKarlaWebApp'
-  webAppName: 'karlasstuffs'
+  webAppName: 'karlaislearning'
 
 stages:
 - stage: Build
