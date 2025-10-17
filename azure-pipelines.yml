@@ -73,13 +73,13 @@ stages:
     - task: DownloadBuildArtifacts@1
       displayName: 'Download Build Artifacts'
         inputs:
-          artifactName: 'drop'
-          downloadPath: '$(System.ArtifactsDirectory)'
+        artifactName: 'drop'
+        downloadPath: '$(System.ArtifactsDirectory)'
 
     - task: AzureWebApp@1
       displayName: 'Deploy Azure Web App'
         inputs:
-          azureSubscription: '$(azureSubscription)'
-          appType: 'webApp'
-          appName: '$(webAppName)'
-          package: '$(System.ArtifactsDirectory)/drop/**/*.zip'
+        azureSubscription: '$(azureSubscription)'
+        appType: 'webApp'
+        appName: '$(webAppName)'
+        package: '$(System.ArtifactsDirectory)/drop/**/*.zip'
