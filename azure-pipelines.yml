@@ -23,7 +23,7 @@ stages:
   jobs:
   - job: BuildJob
     displayName: 'Build and Publish'
-    steps: # <-- LÍNEA 72: Asegúrate de que esta línea esté correctamente indentada.
+    steps:
     - task: UseDotNet@2
       displayName: 'Use .NET 8.x SDK'
       inputs:
