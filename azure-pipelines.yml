@@ -9,19 +9,13 @@ pool:
 # Variables que podemos usar en la pipeline
 variables:
   buildConfiguration: 'Release' # Compilaremos en modo Release
-  # ¡IMPORTANTE! Ajusta esta ruta según la estructura real de tu repositorio.
-  # Basado en tu información, tu proyecto .NET está dentro de una carpeta llamada 'MiWebAppKarlasStuffs'
-  # en la raíz de tu repositorio 'karlasstuffs'.
   projectPath: 'MiWebAppKarlasStuffs/' 
   
   # *************************************************************************
-  # NUEVAS VARIABLES PARA EL DESPLIEGUE
+  # VARIABLES PARA EL DESPLIEGUE (CONFIRMADAS)
   # *************************************************************************
-  azureSubscription: 'AzureServiceConnectionForKarlaWebApp' # El nombre de tu conexión de servicio de Azure
-                                                       # (Verifica que sea exactamente como la creaste,
-                                                       # en tu imagen se ve "AzureServiceConnectionForWebApp")
-  webAppName: 'karlasstuffs'                    # El nombre de tu Azure App Service
-                                                       # (Asegúrate que coincida con el nombre real de tu App Service en Azure)
+  azureSubscription: 'AzureServiceConnectionForKarlaWebApp' 
+  webAppName: 'karlastuffs'                    
 
 stages:
 - stage: Build
@@ -35,14 +29,12 @@ stages:
       inputs:
         version: '8.x' # Asegúrate de que coincida con la versión de tu proyecto
 
-    # 1. Tarea para restaurar paquetes NuGet
     - task: DotNetCoreCLI@2
       displayName: 'Dotnet Restore'
       inputs:
         command: 'restore'
         projects: '$(projectPath)MiWebAppKarlasStuffs.csproj'
 
-    # 2. Tarea para compilar la aplicación
     - task: DotNetCoreCLI@2
       displayName: 'Dotnet Build'
       inputs:
@@ -50,7 +42,6 @@ stages:
         projects: '$(projectPath)MiWebAppKarlasStuffs.csproj'
         arguments: '--configuration $(buildConfiguration)'
 
-    # 3. Tarea para publicar los artefactos de la compilación
     - task: DotNetCoreCLI@2
       displayName: 'Dotnet Publish'
       inputs:
@@ -60,7 +51,6 @@ stages:
         arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)' 
         zipAfterPublish: true 
 
-    # 4. Tarea para subir el artefacto resultante a Azure DevOps
     - task: PublishBuildArtifacts@1
       displayName: 'Upload Build Artifact'
       inputs:
@@ -70,29 +60,26 @@ stages:
 
 - stage: Deploy
   displayName: 'Deploy Stage'
-  dependsOn: Build # Esta etapa depende de que la etapa de Build haya sido exitosa
-  condition: succeeded() # Solo se ejecuta si la etapa anterior fue exitosa
+  dependsOn: Build
+  condition: succeeded()
   jobs:
   - deployment: DeployWebApp
     displayName: 'Deploy Web App'
     environment: 'karlastuffs-env' # Puedes usar un nombre de entorno lógico para tu despliegue
     pool:
-      vmImage: 'ubuntu-latest' # O 'windows-latest' si prefieres
+      vmImage: 'ubuntu-latest' 
 
-    steps:
+    steps: # <-- ¡Presta especial atención a la indentación aquí!
     - task: DownloadBuildArtifacts@1
       displayName: 'Download Build Artifacts'
       inputs:
-        artifactName: 'drop' # El nombre del artefacto que publicaste en la etapa de Build
+        artifactName: 'drop'
         downloadPath: '$(System.ArtifactsDirectory)'
 
     - task: AzureWebApp@1
       displayName: 'Deploy Azure Web App'
       inputs:
-        azureSubscription: '$(azureSubscription)' # Usa la variable de tu conexión de servicio
+        azureSubscription: '$(azureSubscription)'
         appType: 'webApp'
-        appName: '$(webAppName)'                 # Usa la variable del nombre de tu App Service
-        package: '$(System.ArtifactsDirectory)/drop/**/*.zip' # Ruta al paquete ZIP dentro del artefacto descargado
-        # Argumentos opcionales para el despliegue, por ejemplo, si necesitas configurar un slot:
-        # deploymentMethod: 'zipDeploy' 
-        # resourceGroupName: 'TuGrupoDeRecursos' # Solo si tu suscripción tiene muchos recursos y quieres ser explícito
+        appName: '$(webAppName)'
+        package: '$(System.ArtifactsDirectory)/drop/**/*.zip'
